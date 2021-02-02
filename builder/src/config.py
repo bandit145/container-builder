@@ -22,7 +22,7 @@ class Config:
             if v["required"] and k not in conf_keys:
                 raise Exception(f"Config missing {k}")
             elif "default" in v.keys() and k not in conf_keys:
-                new_conf[k] = v['default']
+                new_conf[k] = v["default"]
             else:
                 new_conf[k] = config[k]
         return new_conf
@@ -36,4 +36,3 @@ class Config:
 
     def load(self, path):
         self.config = self.validate(self.read_file(path))
-        
