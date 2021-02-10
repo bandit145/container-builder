@@ -35,7 +35,7 @@ class Git(Repo):
         if os.path.exists(f"{self.repo_dir}/{self.name}"):
 
             output = subprocess.run(
-                "git pull",
+                "git fetch --all --tags",
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -53,14 +53,17 @@ class Git(Repo):
             raise exceptions.RepoException(output.stdout)
 
     def set_branch(self):
-        current_branch = str(subprocess.run(
-            f"git branch --show-current",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            cwd=f"{self.repo_dir}/{self.name}",
-            check=True,
-        ).stdout).strip("\n")
+        # not used for anything yet but it should be used to reset to a working branch
+        current_branch = str(
+            subprocess.run(
+                f"git branch --show-current",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                cwd=f"{self.repo_dir}/{self.name}",
+                check=True,
+            ).stdout
+        ).strip("\n")
         if self.release:
             output = subprocess.run(
                 f"git checkout {self.release}",
