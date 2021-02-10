@@ -1,0 +1,2 @@
+class RepoException(Exception):
+    pass
