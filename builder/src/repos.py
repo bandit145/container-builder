@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import subprocess
 import os
 import builder.src.exceptions as exceptions
@@ -16,12 +16,16 @@ class Repo(ABC):
         self.name = name
         self.repo_dir = repo_dir
 
-    @classmethod
+    @abstractmethod
     def update(self):
         pass
 
-    @classmethod
+    @abstractmethod
     def configure(self):
+        pass
+
+    @abstractmethod
+    def cleanup(self):
         pass
 
 
@@ -72,6 +76,9 @@ class Git(Repo):
                 stderr=subprocess.STDOUT,
                 cwd=f"{self.repo_dir}/{self.name}",
             )
+
+    def cleanup(self):
+        pass
 
     def configure(self):
         self.update()

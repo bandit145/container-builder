@@ -12,10 +12,13 @@ class Build:
 
     def __init__(self, logger, user_env_var, pass_env_var, **kwargs):
         self.client = docker.from_env()
-        self.repo = kwargs["repo"]
         self.user_env_var = user_env_var
         self.pass_env_var = pass_env_var
         self.logger = logger
+        if 'test_flag' in kwargs.keys():
+            self.test_flag = kwargs['test_flag']
+        if 'push_flag' in kwargs.keys():
+            self.push_flag = kwargs['push_flag']
 
     def get_creds(self):
         username = os.getenv(self.user_env_var)
@@ -36,11 +39,6 @@ class Build:
             raise Exception(f"{cont} build failed!")
         return image[0]
 
-    def read_info(cont):
-        with open(f"{cont}/info.json", mode="r") as conf:
-            info = json.load(conf)
-        return info
-
     def read_test(cont):
         with open(f"{cont}/info.json", mode="r") as conf:
             test = json.load(conf)
@@ -53,18 +51,18 @@ class Build:
             self.logger.error(f"{repo}:{tag} does not exist")
 
     def run(self, cont, config):
-        repo, tag = config.config["tag"].split(":")[0]
+        repo, tag = config["tag"].split(":")[0]
         tests = self.read_test(cont)
         tags = self.get_repo_tags(repo)
         existing_img = self.pull(repo, tags[0])
-        img = self.build(config.config["tag"], cont)
+        img = self.build(config["tag"], cont)
         if self.test_flag:
-            self.test(config.config["tag"], config.config["capabilities"], tests)
+            self.test(config["tag"], config["capabilities"], tests)
         if self.push_flag:
             self.push(cont, repo)
 
     def get_repo_tags(self, repo):
-        repo_domain, repo = self.repo.split("/")
+        repo_domain, repo = repo.split("/")
         repo = "/".join(repo)
         req = requests.get(f"https://{repo_domain}/v2/{repo}/tags/list")
         # deal with betas etc.

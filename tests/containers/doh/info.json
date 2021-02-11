@@ -1,0 +1,12 @@
+{
+        "tag":"doh:latest",
+        "repo":"quay.io/bandit145/",
+        "src":{
+        	"type": "git",
+        	"url": "https://github.com/m13253/dns-over-https.git"
+        },
+        "strategy": {
+        	"name": "track-branch",
+        	"branch": "master"
+        }
+}
