@@ -15,10 +15,10 @@ class Build:
         self.user_env_var = user_env_var
         self.pass_env_var = pass_env_var
         self.logger = logger
-        if 'test_flag' in kwargs.keys():
-            self.test_flag = kwargs['test_flag']
-        if 'push_flag' in kwargs.keys():
-            self.push_flag = kwargs['push_flag']
+        if "test_flag" in kwargs.keys():
+            self.test_flag = kwargs["test_flag"]
+        if "push_flag" in kwargs.keys():
+            self.push_flag = kwargs["push_flag"]
 
     def get_creds(self):
         username = os.getenv(self.user_env_var)
@@ -31,7 +31,7 @@ class Build:
 
     def build(self, tag, cont):
         self.logger.info(f"Starting build of container {cont}")
-        image = self.client.images.build(path=cont, tag=f"{tag} ", rm=True)
+        image = self.client.images.build(path=cont, tag=tag, rm=True)
         try:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
         except KeyError:
@@ -50,16 +50,20 @@ class Build:
         except docker.Errors.APIError:
             self.logger.error(f"{repo}:{tag} does not exist")
 
-    def run(self, cont, config):
+    def run(self, cont, config, strat):
         repo, tag = config["tag"].split(":")[0]
         tests = self.read_test(cont)
         tags = self.get_repo_tags(repo)
         existing_img = self.pull(repo, tags[0])
         img = self.build(config["tag"], cont)
+        if existing_img:
+            img_same = strat.compare(img, existing_img)
+            self.logger.info(f'Images are the same: {img_same}')
         if self.test_flag:
             self.test(config["tag"], config["capabilities"], tests)
         if self.push_flag:
-            self.push(cont, repo)
+            if not img_same:
+                self.push(cont, repo)
 
     def get_repo_tags(self, repo):
         repo_domain, repo = repo.split("/")
@@ -85,11 +89,11 @@ class Build:
             output = running_cont.exec_run(test["command"])
             try:
                 assert eval(
-                    test["assert"].strip() + " " + '"' + str(output.output) + '"'
+                    f'{test["assert"].strip()} str({str(output.output)})'
                 )
-            except AssertionError:
+            except (AssertionError, SyntaxError):
                 self.logger.info(
-                    f"{tag} test failed: assert {test['assert']} != {output.output}"
+                    f"{tag} test failed: assert {test['assert']} {output.output}"
                 )
                 running_cont.remove(force=True)
                 raise Exception("Container test failed!")
