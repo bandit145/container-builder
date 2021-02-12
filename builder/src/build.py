@@ -58,7 +58,7 @@ class Build:
         img = self.build(config["tag"], cont)
         if existing_img:
             img_same = strat.compare(img, existing_img)
-            self.logger.info(f'Images are the same: {img_same}')
+            self.logger.info(f"Images are the same: {img_same}")
         if self.test_flag:
             self.test(config["tag"], config["capabilities"], tests)
         if self.push_flag:
@@ -88,9 +88,7 @@ class Build:
         for test in tests:
             output = running_cont.exec_run(test["command"])
             try:
-                assert eval(
-                    f'{test["assert"].strip()} str({str(output.output)})'
-                )
+                assert eval(f'{test["assert"].strip()} str({str(output.output)})')
             except (AssertionError, SyntaxError):
                 self.logger.info(
                     f"{tag} test failed: assert {test['assert']} {output.output}"

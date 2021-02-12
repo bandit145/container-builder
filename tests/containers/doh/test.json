@@ -2,10 +2,5 @@
 	{
 		"command": "ps",
 		"assert": "'doh-server' in"
-	},
-	{
-		"command": "ps",
-		"assert": "'wat' in"
 	}
-
 ]
