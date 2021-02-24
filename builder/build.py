@@ -21,6 +21,11 @@ def parse_args():
     parser.add_argument(
         "-w", "--workers", help="number of workers", type=int, default=4
     )
+    parseer.add_argument(
+        "--repo-dir",
+        help="directory to clone repos to",
+        default="/tmp/container-builder/",
+    )
     parser.add_argument("--userenv", help="env var with username")
     parser.add_argument("--passwordenv", help="env var with password")
     return parser.parse_args()
@@ -35,6 +40,7 @@ def discover_containers():
     return conts
 
 
+# logger per runner
 def configure_logging():
     pass
 
@@ -49,7 +55,21 @@ def build_container(cont, args):
     )
     conf = Config()
     conf.load(f"{cont}/info.json")
-    build.run(cont, conf.config)
+    repo_name = list(conf["src"]["type"])
+    repo_name[0] = repo_name[0].upper()
+    repo_name = "".join(repo_name)
+    if hasattr(repos, repo_name):
+        # get repo_dir from somewhere
+        repo = getattr(repos, repo_name)(args.repo_dir, **conf["src"]["args"])
+    else:
+        raise Exception(f"{repo_name} repo type not found!")
+    if hasattr(strats, conf["strategy"]["name"]):
+        strat = getattr(strats, conf["strategy"]["name"])(conf["strategy"]["args"])(
+            repo
+        )
+    else:
+        raise Exception(f"{conf['strategy']['name']} strategy not found!")
+    build.run(cont, conf.config, strat)
 
 
 def execute_container_builds():

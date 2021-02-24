@@ -3,10 +3,14 @@
         "repo":"quay.io/bandit145/",
         "src":{
         	"type": "git",
-        	"url": "https://github.com/m13253/dns-over-https.git"
+                "args": {
+        	       "url": "https://github.com/m13253/dns-over-https.git"
+                }
         },
         "strategy": {
         	"name": "track-branch",
-        	"branch": "master"
+                "args": {
+        	       "branch": "master"
+                }
         }
 }

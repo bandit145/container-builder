@@ -1,5 +1,5 @@
 from builder.src.build import Build
-from builder.src.strategies import Strategy
+from builder.src.strategies import TestStrat
 import json
 import os
 import logging
@@ -33,5 +33,5 @@ def test_test():
 
 
 def test_tags():
-	build = Build(logging, "TEST_USER_NAME", "TEST_USER_PASS")
-	assert '2.6.0' in build.get_repo_tags('quay.io/prometheus/prometheus')
+    build = Build(logging, "TEST_USER_NAME", "TEST_USER_PASS")
+    assert "2.6.0" in build.get_repo_tags("quay.io/prometheus/prometheus")

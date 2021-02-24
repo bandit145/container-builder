@@ -15,6 +15,7 @@ class Repo(ABC):
         self.release = release
         self.name = name
         self.repo_dir = repo_dir
+        self.path = f"{self.repo_dir}/{self.name}"
 
     @abstractmethod
     def update(self):
@@ -30,10 +31,10 @@ class Repo(ABC):
 
 
 class Git(Repo):
-    def __init__(self, repo_url, repo_dir, name=None, branch=None):
-        if not name:
-            name = repo_url.split("/")[-1].split(".")[0]
-        super().__init__(repo_url, repo_dir, name, branch)
+    def __init__(self, repo_dir, **kwargs):
+        if "name " not in kwargs.keys():
+            name = kwargs["url"].split("/")[-1].split(".")[0]
+        super().__init__(kwargs["url"], repo_dir, name, kwargs["branch"])
 
     def update(self):
         if os.path.exists(f"{self.repo_dir}/{self.name}"):

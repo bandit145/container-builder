@@ -61,22 +61,28 @@ class Build:
             self.logger.info(f"Images are the same: {img_same}")
         if self.test_flag:
             self.test(config["tag"], config["capabilities"], tests)
-        if self.push_flag:
+        if self.push_flag and strat.compare():
             if not img_same:
                 self.push(cont, repo)
 
+    # possible move this to strategies
     def get_repo_tags(self, repo):
         repo = repo.split("/")
         repo_domain = repo[0]
-        del repo[0] 
+        del repo[0]
         repo = "/".join(repo)
         req = requests.get(f"https://{repo_domain}/v2/{repo}/tags/list")
         # deal with betas etc.
         # add in  master/main/latest support
         self.logger.debug(f"Tags from repo {req.json()['tags']}")
         tags = sorted(
-            [semver.VersionInfo.parse(x.strip("v")) for x in req.json()["tags"] if x != "latest"],
-            reverse=True)
+            [
+                semver.VersionInfo.parse(x.strip("v"))
+                for x in req.json()["tags"]
+                if x != "latest"
+            ],
+            reverse=True,
+        )
         return tags
 
     def test(self, tag, capabilities, tests):

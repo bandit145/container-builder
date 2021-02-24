@@ -6,7 +6,7 @@ REPO_DIR = "/tmp/"
 
 
 def test_git_clone():
-    git = Git(GIT_URL, REPO_DIR, None, "v1.0")
+    git = Git(REPO_DIR, **{"url": GIT_URL, "branch": "v1.0"})
     git.update()
     git.set_branch()
     output = subprocess.run(
