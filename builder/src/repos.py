@@ -29,6 +29,18 @@ class Repo(ABC):
     def cleanup(self):
         pass
 
+class TestRepo(Repo):
+    def __init__(self, repo_dir, **kwargs):
+        super().__init__(kwargs["url"], repo_dir, kwargs['name'], kwargs["branch"])
+
+    def update(self):
+        pass
+    def configure(self):
+        pass
+
+    def cleanup(self):
+        pass
+
 
 class Git(Repo):
     def __init__(self, repo_dir, **kwargs):
