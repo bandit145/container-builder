@@ -68,7 +68,7 @@ class Tag(Strategy):
                 f"Something went wrong with listing tags {output.stdout}"
             )
         tags = []
-        for tag in str(output.stdout).split("\n"):
+        for tag in str(output.stdout).strip("b'").split("\\n"):
             tag = tag.strip("v")
             try:
                 tags.append(semver.VersionInfo.parse(tag))
