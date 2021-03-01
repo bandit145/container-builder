@@ -16,9 +16,9 @@ def test_build():
     os.chdir("tests/containers")
     conf = import_config("doh/info.json")
     build = Build(logging, "TEST_USER_NAME", "TEST_USER_PASS")
-    build.prep('doh', f'{cwd}/tests/data/')
+    build.prep("doh", f"{cwd}/tests/data/")
     img = build.build(f'{conf["repo"]}:latest', "doh")
-    build.cleanup('doh')
+    build.cleanup("doh")
     os.chdir(cwd)
     assert img.tags[0] == f'{conf["repo"]}:latest'
 
@@ -29,8 +29,8 @@ def test_test():
     conf = import_config("doh/info.json")
     tests = import_config("doh/test.json")
     build = Build(logging, "TEST_USER_NAME", "TEST_USER_PASS")
-    build.prep('doh', f'{cwd}/tests/data/')
+    build.prep("doh", f"{cwd}/tests/data/")
     img = build.build(f'{conf["repo"]}:latest', "doh")
     build.test(f'{conf["repo"]}:latest', None, tests)
-    build.cleanup('doh')
+    build.cleanup("doh")
     os.chdir(cwd)

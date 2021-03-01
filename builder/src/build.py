@@ -11,7 +11,7 @@ import shutil
 class Build:
     test_flag = True
     push_flag = False
-    build_dir = '/tmp/container-builder'
+    build_dir = "/tmp/container-builder"
 
     def __init__(self, logger, user_env_var, pass_env_var, **kwargs):
         self.client = docker.from_env()
@@ -32,9 +32,11 @@ class Build:
             )
         return {"username": username, "password": password}
 
-    def build(self, tag, cont, build_args = {}):
+    def build(self, tag, cont, build_args={}):
         self.logger.info(f"Starting build of container {cont}")
-        image = self.client.images.build(path=f'{self.build_dir}/{cont}', tag=tag, rm=True, buildargs=build_args)
+        image = self.client.images.build(
+            path=f"{self.build_dir}/{cont}", tag=tag, rm=True, buildargs=build_args
+        )
         try:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
         except KeyError:
@@ -54,14 +56,14 @@ class Build:
         except docker.Errors.APIError:
             self.logger.error(f"{repo}:{tag} does not exist")
 
-    def run(self, cont, config, tag, build_repo, latest=False, build_args={}):
+    def run(self, cont, config, tag, build_repo, latest=False):
         extra_tag = None
         if latest:
-            extra_tag = 'latest'
+            extra_tag = "latest"
         self.prep(cont, build_repo)
         tests = self.read_test(cont)
         try:
-            img = self.build(tag, cont, build_args)
+            img = self.build(tag, cont)
             if self.test_flag:
                 self.test(tag, config["capabilities"], tests)
             if self.push_flag:
@@ -75,12 +77,11 @@ class Build:
         cwd = os.getcwd()
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
-        shutil.copytree(f'{cwd}/{cont}', f'{self.build_dir}/{cont}/')
-        shutil.copytree(build_repo, f'{self.build_dir}/{cont}/build-dir/')
+        shutil.copytree(f"{cwd}/{cont}", f"{self.build_dir}/{cont}/")
+        shutil.copytree(build_repo, f"{self.build_dir}/{cont}/build-dir/")
 
     def cleanup(self, cont):
-        shutil.rmtree(f'{self.build_dir}/{cont}')
-
+        shutil.rmtree(f"{self.build_dir}/{cont}")
 
     def test(self, tag, capabilities, tests):
         running_cont = self.client.containers.run(

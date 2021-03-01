@@ -104,8 +104,7 @@ class Tag(Strategy):
                         config,
                         tag=f"{config['repo']}:{vsn_tag}",
                         build_repo=self.repo.path,
-                        latest=True,
-                        build_args={"repo_path": self.repo.path},
+                        latest=True
                     )
                 else:
                     build.run(
@@ -113,8 +112,7 @@ class Tag(Strategy):
                         config,
                         tag=f"{config['repo']}:{vsn_tag}",
                         build_repo=self.repo.path,
-                        latest=False,
-                        build_args={"repo_path": self.repo.path},
+                        latest=False
                     )
 
     def compare(self, **kwargs):
