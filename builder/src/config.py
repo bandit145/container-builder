@@ -5,9 +5,10 @@ import os
 class Config:
 
     schema = {
-        "tag": {"required": False},
         "repo": {"required": True},
         "capabilities": {"required": False, "default": []},
+        "strategy": {"required": True},
+        "src": {"required": True}
     }
 
     config = None

@@ -4,11 +4,13 @@ import re
 import requests
 import datetime
 import semver
+import json
 
 
 class Build:
     test_flag = True
     push_flag = False
+    build_dir = '/tmp/container-builder'
 
     def __init__(self, logger, user_env_var, pass_env_var, **kwargs):
         self.client = docker.from_env()
@@ -29,9 +31,9 @@ class Build:
             )
         return {"username": username, "password": password}
 
-    def build(self, tag, cont):
+    def build(self, tag, cont, build_args = {}):
         self.logger.info(f"Starting build of container {cont}")
-        image = self.client.images.build(path=cont, tag=tag, rm=True)
+        image = self.client.images.build(path=cont, tag=tag, rm=True, buildargs=build_args)
         try:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
         except KeyError:
@@ -39,8 +41,8 @@ class Build:
             raise Exception(f"{cont} build failed!")
         return image[0]
 
-    def read_test(cont):
-        with open(f"{cont}/info.json", mode="r") as conf:
+    def read_test(self, cont):
+        with open(f"{cont}/test.json", mode="r") as conf:
             test = json.load(conf)
         return test
 
@@ -50,20 +52,29 @@ class Build:
         except docker.Errors.APIError:
             self.logger.error(f"{repo}:{tag} does not exist")
 
-    def run(self, cont, config, strat):
-        repo, tag = config["tag"].split(":")[0]
+    def run(self, cont, config, tag, build_repo, latest=False, build_args={}):
+        extra_tag = None
+        if latest:
+            extra_tag = 'latest'
+        self.prep(cont, build_repo)
         tests = self.read_test(cont)
-        # tags = self.get_repo_tags(repo)
-        existing_img = self.pull(repo, tags[0])
-        img = self.build(config["tag"], cont)
-        if existing_img:
-            img_same = strat.compare(img, existing_img)
-            self.logger.info(f"Images are the same: {img_same}")
+        img = self.build(tag, cont, build_args)
         if self.test_flag:
-            self.test(config["tag"], config["capabilities"], tests)
-        if self.push_flag and strat.compare():
-            if not img_same:
-                self.push(cont, repo)
+            self.test(tag, config["capabilities"], tests)
+        if self.push_flag:
+            self.push(cont, tag, extra_tag)
+
+    def prep(self, cont, build_repo):
+        cwd = os.getcwd()
+        if not os.path.exists(self.build_dir):
+            os.mkdir(self.build_dir)
+        if not os.path.exists(f'{self.build_dir}/{cont}/'):
+            # os.mkdir(f'{self.build_dir}/{cont}/')
+            os.symlink(f'{self.build_dir}/{cont}/', f'{cwd}/{cont}')
+        if not os.path.exists(f'{self.build_dir}/{cont}/build-dir/'):
+            # os.mkdir(f'{self.build_dir}/{cont}/build-dir/')
+            os.symlink(build_repo, f'{self.build_dir}/{cont}/build-dir/')
+
 
     def test(self, tag, capabilities, tests):
         running_cont = self.client.containers.run(
@@ -79,6 +90,7 @@ class Build:
                 )
                 running_cont.remove(force=True)
                 raise Exception("Container test failed!")
+        running_cont.remove(force=True)
 
     def push(self, cont, repo, extra_tag=None):
         self.logger.info(f"pushing container {cont} to {repo}")

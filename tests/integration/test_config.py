@@ -8,5 +8,4 @@ def test_config():
     conf = config.read_file(CONFIG_FILE)
     new_conf = config.validate(conf)
     assert new_conf["capabilities"] == []
-    assert new_conf["tag"] == "dnsmasq:latest"
-    assert new_conf["repo"] == "quay.io/bandit145/"
+    assert new_conf["repo"] == "quay.io/bandit145/dnsmasq"

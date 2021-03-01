@@ -7,9 +7,10 @@
                 }
         },
         "strategy": {
-        	"name": "track-branch",
+        	"name": "track_tag",
                 "args": {
-        	       "branch": "master"
+        	       "tag_prefix": "v",
+                       "version": "2.0.0"
                 }
         }
 }

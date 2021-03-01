@@ -6,9 +6,9 @@ REPO_DIR = "/tmp/"
 
 
 def test_git_clone():
-    git = Git(REPO_DIR, **{"url": GIT_URL, "branch": "v1.0"})
+    git = Git(REPO_DIR, **{"url": GIT_URL})
     git.update()
-    git.set_branch()
+    git.set_branch('v1.0.0')
     output = subprocess.run(
         "git describe --tags",
         shell=True,
@@ -16,4 +16,4 @@ def test_git_clone():
         stderr=subprocess.STDOUT,
         cwd=f"{REPO_DIR}/{git.name}",
     )
-    assert "v1.0" in str(output.stdout)
+    assert "v1.0.0" in str(output.stdout)

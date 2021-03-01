@@ -10,9 +10,8 @@ class Repo(ABC):
     repo_dir = None
     name = None
 
-    def __init__(self, repo_url, repo_dir, name, release):
+    def __init__(self, repo_url, repo_dir, name):
         self.repo_url = repo_url
-        self.release = release
         self.name = name
         self.repo_dir = repo_dir
         self.path = f"{self.repo_dir}/{self.name}"
@@ -32,7 +31,7 @@ class Repo(ABC):
 
 class TestRepo(Repo):
     def __init__(self, repo_dir, **kwargs):
-        super().__init__(kwargs["url"], repo_dir, kwargs["name"], kwargs["branch"])
+        super().__init__(kwargs["url"], repo_dir, kwargs["name"])
 
     def update(self):
         pass
@@ -46,9 +45,9 @@ class TestRepo(Repo):
 
 class Git(Repo):
     def __init__(self, repo_dir, **kwargs):
-        if "name " not in kwargs.keys():
+        if "name" not in kwargs.keys():
             name = kwargs["url"].split("/")[-1].split(".")[0]
-        super().__init__(kwargs["url"], repo_dir, name, kwargs["branch"])
+        super().__init__(kwargs["url"], repo_dir, name)
 
     def update(self):
         if os.path.exists(f"{self.repo_dir}/{self.name}"):
@@ -71,30 +70,31 @@ class Git(Repo):
         if output.returncode != 0:
             raise exceptions.RepoException(output.stdout)
 
-    def set_branch(self):
+    def set_branch(self, branch):
         # not used for anything yet but it should be used to reset to a working branch
-        current_branch = str(
-            subprocess.run(
-                f"git branch --show-current",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                cwd=f"{self.repo_dir}/{self.name}",
-                check=True,
-            ).stdout
-        ).strip("\n")
-        if self.release:
-            output = subprocess.run(
-                f"git checkout {self.release}",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                cwd=f"{self.repo_dir}/{self.name}",
-            )
+        # current_branch = str(
+        #     subprocess.run(
+        #         f"git branch --show-current",
+        #         shell=True,
+        #         stdout=subprocess.PIPE,
+        #         stderr=subprocess.STDOUT,
+        #         cwd=f"{self.repo_dir}/{self.name}",
+        #         check=True,
+        #     ).stdout
+        # ).strip("\n")
+        output = subprocess.run(
+            f"git checkout {branch}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=f"{self.repo_dir}/{self.name}",
+        )
+        if output.returncode != 0:
+            raise exceptions.RepoException(output.stdout)
 
     def cleanup(self):
         pass
 
-    def configure(self):
+    def configure(self, branch):
         self.update()
-        self.set_branch()
+        self.set_branch(branch)
