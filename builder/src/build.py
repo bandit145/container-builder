@@ -5,6 +5,7 @@ import requests
 import datetime
 import semver
 import json
+import shutil
 
 
 class Build:
@@ -33,12 +34,13 @@ class Build:
 
     def build(self, tag, cont, build_args = {}):
         self.logger.info(f"Starting build of container {cont}")
-        image = self.client.images.build(path=cont, tag=tag, rm=True, buildargs=build_args)
+        image = self.client.images.build(path=f'{self.build_dir}/{cont}', tag=tag, rm=True, buildargs=build_args)
         try:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
         except KeyError:
             [self.logger.info(x) for x in image[1]]
             raise Exception(f"{cont} build failed!")
+
         return image[0]
 
     def read_test(self, cont):
@@ -58,22 +60,26 @@ class Build:
             extra_tag = 'latest'
         self.prep(cont, build_repo)
         tests = self.read_test(cont)
-        img = self.build(tag, cont, build_args)
-        if self.test_flag:
-            self.test(tag, config["capabilities"], tests)
-        if self.push_flag:
-            self.push(cont, tag, extra_tag)
+        try:
+            img = self.build(tag, cont, build_args)
+            if self.test_flag:
+                self.test(tag, config["capabilities"], tests)
+            if self.push_flag:
+                self.push(cont, tag, extra_tag)
+        except Exception as error:
+            raise Exception(error)
+        finally:
+            self.cleanup(cont)
 
     def prep(self, cont, build_repo):
         cwd = os.getcwd()
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
-        if not os.path.exists(f'{self.build_dir}/{cont}/'):
-            # os.mkdir(f'{self.build_dir}/{cont}/')
-            os.symlink(f'{self.build_dir}/{cont}/', f'{cwd}/{cont}')
-        if not os.path.exists(f'{self.build_dir}/{cont}/build-dir/'):
-            # os.mkdir(f'{self.build_dir}/{cont}/build-dir/')
-            os.symlink(build_repo, f'{self.build_dir}/{cont}/build-dir/')
+        shutil.copytree(f'{cwd}/{cont}', f'{self.build_dir}/{cont}/')
+        shutil.copytree(build_repo, f'{self.build_dir}/{cont}/build-dir/')
+
+    def cleanup(self, cont):
+        shutil.rmtree(f'{self.build_dir}/{cont}')
 
 
     def test(self, tag, capabilities, tests):

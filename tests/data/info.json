@@ -1,4 +1,5 @@
 {
-        "tag":"dnsmasq:latest",
-        "repo":"quay.io/bandit145/"
+        "repo":"quay.io/bandit145/dnsmasq",
+        "strategy": {},
+        "src": ""
 }

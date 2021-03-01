@@ -8,7 +8,7 @@ class Config:
         "repo": {"required": True},
         "capabilities": {"required": False, "default": []},
         "strategy": {"required": True},
-        "src": {"required": True}
+        "src": {"required": True},
     }
 
     config = None
