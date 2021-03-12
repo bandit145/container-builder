@@ -34,10 +34,15 @@ class Branch(Strategy):
         super().__init__(repo)
 
     def execute(self, **kwargs):
-        pass
-
-    def compare(self, **kwargs):
-        return kwargs["new_img"].id != kwargs["img"].id
+        config = kwargs['config']
+        self.repo.set_branch(config['strategy']['args']['branch'])
+        build.run(
+            cont,
+            config,
+            tag=f"{config['repo']}:latest",
+            build_repo=self.repo.path,
+            latest=True,
+        )
 
 
 class Tag(Strategy):
@@ -104,7 +109,7 @@ class Tag(Strategy):
                         config,
                         tag=f"{config['repo']}:{vsn_tag}",
                         build_repo=self.repo.path,
-                        latest=True
+                        latest=True,
                     )
                 else:
                     build.run(
@@ -112,14 +117,8 @@ class Tag(Strategy):
                         config,
                         tag=f"{config['repo']}:{vsn_tag}",
                         build_repo=self.repo.path,
-                        latest=False
+                        latest=False,
                     )
-
-    def compare(self, **kwargs):
-        rmt_tags = set(self.get_remote_repo_tags(kwargs["repo"]))
-        lcl_tags = set(self.get_local_repo_tags())
-        return kwargs["latest"] != kwargs["remote_latest"]
-
 
 # extra references for config file
 track_branch = Branch

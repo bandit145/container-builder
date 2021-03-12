@@ -42,3 +42,6 @@ def test_tag_strategy():
     os.chdir(CONTAINER_REPO)
     strat.execute("doh-tag-strat", build=build, config=config)
     os.chdir(cwd)
+
+def test_branch_strategy():
+    pass

@@ -21,11 +21,12 @@ def parse_args():
     parser.add_argument(
         "-w", "--workers", help="number of workers", type=int, default=4
     )
-    parseer.add_argument(
+    parser.add_argument(
         "--repo-dir",
         help="directory to clone repos to",
         default="/tmp/container-builder/",
     )
+    parser.add_argument('--record-dir', help='where to record build dates', default="/var/container-builder/")
     parser.add_argument("--userenv", help="env var with username")
     parser.add_argument("--passwordenv", help="env var with password")
     return parser.parse_args()
