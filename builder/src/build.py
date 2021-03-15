@@ -4,6 +4,7 @@ import json
 import shutil
 from builder.src.exceptions import BuildException
 
+
 class Build:
     test_flag = True
     push_flag = False

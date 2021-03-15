@@ -5,8 +5,10 @@ class RepoException(Exception):
 class StrategyException(Exception):
     pass
 
+
 class BuildException(Exception):
-	pass
+    pass
+
 
 class ConfigException(Exception):
-	pass
+    pass

@@ -3,6 +3,7 @@ import subprocess
 import os
 from builder.src.exceptions import RepoException
 
+
 class Repo(ABC):
     repo_url = None
     release = None
