@@ -108,7 +108,7 @@ class Build:
                 )
                 running_cont.remove(force=True)
                 raise BuildException("Container test failed!")
-        self.logger.info(f'All {len(tests)} tests passed')
+        self.logger.info(f"All {len(tests)} tests passed")
         running_cont.remove(force=True)
 
     def push(self, cont, repo, extra_tag=None):

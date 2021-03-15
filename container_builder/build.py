@@ -12,11 +12,18 @@ import sys
 def parse_args():
     parser = argparse.ArgumentParser(description="build containers")
     parser.add_argument(
-        "-d", "--dir", help="directory to build from. If not used builds all", default='.'
+        "-d",
+        "--dir",
+        help="directory to build from. If not used builds all",
+        default=".",
     )
     parser.add_argument("-l", "--labels", help="labels in label=thing,label2=thing")
     parser.add_argument(
-        "-p", "--push", help="push container when done", action="store_true", default=False
+        "-p",
+        "--push",
+        help="push container when done",
+        action="store_true",
+        default=False,
     )
     parser.add_argument("--test", help="run tests before pushing", action="store_true")
     parser.add_argument(
@@ -32,7 +39,9 @@ def parse_args():
         help="logging directory",
         default="/var/log/container-builder",
     )
-    parser.add_argument('--log-level', help='logging level', default='info', choices=['info','debug'])
+    parser.add_argument(
+        "--log-level", help="logging level", default="info", choices=["info", "debug"]
+    )
     parser.add_argument("--userenv", help="env var with username")
     parser.add_argument("--passwordenv", help="env var with password")
     return parser.parse_args()
@@ -50,8 +59,10 @@ def discover_containers(cont_dir):
 # logger per runner
 def configure_logging(cont, log_dir, log_level):
     if not os.path.isdir(log_dir):
-        raise Exception('log directory not created')
-    logging.basicConfig(filename=f"{log_dir}/{cont}.log", level=getattr(logging,log_level.upper()))
+        raise Exception("log directory not created")
+    logging.basicConfig(
+        filename=f"{log_dir}/{cont}.log", level=getattr(logging, log_level.upper())
+    )
 
 
 def build_container(data):
@@ -75,16 +86,14 @@ def build_container(data):
     else:
         raise Exception(f"{repo_name} repo type not found!")
     if hasattr(strats, conf.config["strategy"]["name"]):
-        strat = getattr(strats, conf.config["strategy"]["name"])(
-            repo
-        )
+        strat = getattr(strats, conf.config["strategy"]["name"])(repo)
     else:
         raise Exception(f"{conf.config['strategy']['name']} strategy not found!")
     strat.execute(cont, build=build, config=conf.config)
 
 
 def execute_container_builds(args):
-    if 'Dockerfile' in os.listdir(args.dir):
+    if "Dockerfile" in os.listdir(args.dir):
         conts = [args.dir]
     else:
         conts = discover_containers(args.dir)
@@ -97,5 +106,4 @@ def run():
         args = parse_args()
         execute_container_builds(args)
     except KeyboardInterrupt:
-        print('User cancelled!')
-
+        print("User cancelled!")

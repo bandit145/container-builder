@@ -30,8 +30,8 @@ class BlindBuild(Strategy):
         super().__init__(repo)
 
     def execute(self, cont, **kwargs):
-        build = kwargs['build']
-        config = kwargs['config']
+        build = kwargs["build"]
+        config = kwargs["config"]
         build.run(
             cont,
             config,
