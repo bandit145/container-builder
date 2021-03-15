@@ -1,6 +1,7 @@
 from builder.src.build import Build
 from builder.src.strategies import MockStrat
 import json
+import docker
 import os
 import logging
 
@@ -9,6 +10,9 @@ def import_config(file):
 
     with open(file, "r") as conf:
         return json.load(conf)
+
+def create_client():
+    return docker.from_env()
 
 
 def test_build():

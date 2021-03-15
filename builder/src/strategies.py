@@ -13,10 +13,6 @@ class Strategy(ABC):
         self.repo = repo
 
     @abstractmethod
-    def compare(self, **kwargs):
-        pass
-
-    @abstractmethod
     def execute(self, **kwargs):
         pass
 
@@ -25,17 +21,17 @@ class MockStrat(Strategy):
     def __init__(self, repo):
         super().__init__(repo)
 
-    def compare(self):
-        return True
-
+    def execute(self, **kwargs):
+        pass
 
 class Branch(Strategy):
     def __init__(self, repo):
         super().__init__(repo)
 
-    def execute(self, **kwargs):
-        config = kwargs['config']
-        self.repo.set_branch(config['strategy']['args']['branch'])
+    def execute(self, cont, **kwargs):
+        build = kwargs["build"]
+        config = kwargs["config"]
+        self.repo.set_branch(config["strategy"]["args"]["branch"])
         build.run(
             cont,
             config,
@@ -119,6 +115,7 @@ class Tag(Strategy):
                         build_repo=self.repo.path,
                         latest=False,
                     )
+
 
 # extra references for config file
 track_branch = Branch
