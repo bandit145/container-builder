@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 import subprocess
 import os
-import builder.src.exceptions as exceptions
-
+from builder.src.exceptions import RepoException
 
 class Repo(ABC):
     repo_url = None
@@ -68,7 +67,7 @@ class Git(Repo):
                 cwd=self.repo_dir,
             )
         if output.returncode != 0:
-            raise exceptions.RepoException(output.stdout)
+            raise RepoException(output.stdout)
 
     def set_branch(self, branch):
         # not used for anything yet but it should be used to reset to a working branch
@@ -90,7 +89,7 @@ class Git(Repo):
             cwd=f"{self.repo_dir}/{self.name}",
         )
         if output.returncode != 0:
-            raise exceptions.RepoException(output.stdout)
+            raise RepoException(output.stdout)
 
     def cleanup(self):
         pass

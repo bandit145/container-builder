@@ -4,3 +4,9 @@ class RepoException(Exception):
 
 class StrategyException(Exception):
     pass
+
+class BuildException(Exception):
+	pass
+
+class ConfigException(Exception):
+	pass

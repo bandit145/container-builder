@@ -1,13 +1,8 @@
 import docker
 import os
-import re
-import requests
-import datetime
-import semver
 import json
 import shutil
-import time
-
+from builder.src.exceptions import BuildException
 
 class Build:
     test_flag = True
@@ -28,7 +23,7 @@ class Build:
         username = os.getenv(self.user_env_var)
         password = os.getenv(self.pass_env_var)
         if not username or not password:
-            raise Exception(
+            raise BuildException(
                 f"Could not find {self.user_env_var} or {self.pass_env_var}"
             )
         return {"username": username, "password": password}
@@ -44,7 +39,7 @@ class Build:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
         except KeyError:
             [self.logger.info(x) for x in image[1]]
-            raise Exception(f"{cont} build failed!")
+            raise BuildException(f"{cont} build failed!")
 
         return image[0]
 
@@ -72,7 +67,7 @@ class Build:
             if self.push_flag:
                 self.push(cont, tag, extra_tag)
         except Exception as error:
-            raise Exception(error)
+            raise BuildException(error)
         finally:
             self.cleanup(cont)
 
@@ -105,7 +100,7 @@ class Build:
                     f"{tag} test failed: assert {test['assert']} {output.output}"
                 )
                 running_cont.remove(force=True)
-                raise Exception("Container test failed!")
+                raise BuildException("Container test failed!")
         running_cont.remove(force=True)
 
     def push(self, cont, repo, extra_tag=None):
@@ -117,4 +112,4 @@ class Build:
         for item in output:
             if "errorDetail" in item:
                 self.logger.info(f"Failed to push {cont}: {item}")
-                raise Exception(f"failed to push {cont}")
+                raise BuildException(f"failed to push {cont}")

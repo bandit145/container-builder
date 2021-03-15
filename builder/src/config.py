@@ -1,5 +1,6 @@
 import json
 import os
+from builder.src.exceptions import ConfigException
 
 
 class Config:
@@ -21,7 +22,7 @@ class Config:
         conf_keys = config.keys()
         for k, v in self.schema.items():
             if v["required"] and k not in conf_keys:
-                raise Exception(f"Config missing {k}")
+                raise ConfigException(f"Config missing {k}")
             elif "default" in v.keys() and k not in conf_keys:
                 new_conf[k] = v["default"]
             else:
@@ -30,7 +31,7 @@ class Config:
 
     def read_file(self, path):
         if not os.path.exists(path):
-            raise Exception(f"{path} does not exist!")
+            raise ConfigException(f"{path} does not exist!")
         with open(path, mode="r") as conf:
             config = json.load(conf)
         return config
