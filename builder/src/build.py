@@ -8,6 +8,7 @@ import json
 import shutil
 import time
 
+
 class Build:
     test_flag = True
     push_flag = False
@@ -34,7 +35,7 @@ class Build:
 
     def build(self, tag, cont, build_args={}):
         self.logger.info(f"Starting build of container {cont}")
-        #I think rm true only works sometimes(?) so we do false here so there isn't one missing 
+        # I think rm true only works sometimes(?) so we do false here so there isn't one missing
         # (I think this might be a race condition) with docker/podman
         image = self.client.images.build(
             path=f"{self.build_dir}/{cont}", tag=tag, buildargs=build_args
@@ -84,8 +85,10 @@ class Build:
 
     def cleanup(self, cont):
         shutil.rmtree(f"{self.build_dir}/{cont}")
-        [print(x.id) for x in self.client.images.list(filters={'dangling': True})]
-        [self.client.images.remove(x.id, force=True) for x in self.client.images.list(filters={'dangling': True})]
+        [
+            self.client.images.remove(x.id, force=True)
+            for x in self.client.images.list(filters={"dangling": True})
+        ]
         # this isn't implemented in podmans docker faux api so we do it the hard way ^
         # self.client.images.prune(filters={'dangling': True})
 

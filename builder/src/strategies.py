@@ -24,6 +24,7 @@ class MockStrat(Strategy):
     def execute(self, **kwargs):
         pass
 
+
 class Branch(Strategy):
     def __init__(self, repo):
         super().__init__(repo)
@@ -64,7 +65,7 @@ class Tag(Strategy):
         )
         return tags
 
-    def get_local_repo_tags(self):
+    def get_local_repo_tags(self, replace_text, force_semver):
         output = subprocess.run(
             "git tag",
             shell=True,
@@ -79,6 +80,11 @@ class Tag(Strategy):
         tags = []
         for tag in str(output.stdout).strip("b'").split("\\n"):
             tag = tag.strip("v")
+            if replace_text:
+                tag = tag.replace(replace_text['match'], replace_text['replacement'])
+            #force semver format
+            if force_semver and len(tag.split('.')) < 3:
+                tag += '.0'
             try:
                 tags.append(semver.VersionInfo.parse(tag))
             # assume there are some nonsense tags and just throw them away
@@ -89,15 +95,30 @@ class Tag(Strategy):
     def execute(self, cont, **kwargs):
         build = kwargs["build"]
         config = kwargs["config"]
+        if 'replace_text' in config["strategy"]["args"].keys():
+            replace_text = config["strategy"]["args"]['replace_text']
+        else:
+            replace_text = None
+        if 'force_semver' in config["strategy"]["args"].keys():
+            force_semver = config["strategy"]["args"]['force_semver']
+        else:
+            force_semver = None
+
         rmt_tags = set(self.get_remote_repo_tags(config["repo"]))
-        lcl_tags = set(self.get_local_repo_tags())
+        lcl_tags = set(self.get_local_repo_tags(replace_text, force_semver))
         tag_diff = sorted(lcl_tags.difference(rmt_tags), reverse=True)
         for vsn_tag in tag_diff:
             if vsn_tag >= semver.VersionInfo.parse(
                 config["strategy"]["args"]["version"]
             ):
+                if replace_text:
+                    repo_tag = str(vsn_tag).replace(replace_text['replacement'], replace_text['match'])
+                else:
+                    repo_tag = vsn_tag
+                if force_semver:
+                    repo_tag = repo_tag.strip(f'{replace_text["match"]}0')
                 self.repo.set_branch(
-                    f"{config['strategy']['args']['tag_prefix']}{vsn_tag}"
+                    f"{config['strategy']['args']['tag_prefix']}{repo_tag}"
                 )
                 if list(tag_diff).index(vsn_tag) == 0:
                     build.run(

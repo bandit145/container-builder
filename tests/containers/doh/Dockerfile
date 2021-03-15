@@ -1,6 +1,6 @@
 FROM docker.io/golang:1.15.8 AS builder
 RUN git clone https://github.com/m13253/dns-over-https.git
-RUN cd dns-over-https/ && make
+RUN cd dns-over-https/ && git checkout v2.2.1 && make
 
 
 FROM docker.io/alpine:latest
