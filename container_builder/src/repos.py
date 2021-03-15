@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import subprocess
 import os
-from builder.src.exceptions import RepoException
+from container_builder.src.exceptions import RepoException
 
 
 class Repo(ABC):
@@ -25,6 +25,20 @@ class Repo(ABC):
         pass
 
     @abstractmethod
+    def cleanup(self):
+        pass
+
+
+class NoRepo(Repo):
+    def __init__(self, repo_dir, **kwargs):
+        super().__init__(None, None, None)
+
+    def update(self):
+        pass
+
+    def configure(self):
+        pass
+
     def cleanup(self):
         pass
 

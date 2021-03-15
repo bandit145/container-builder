@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import subprocess
 import semver
 import requests
-import builder.src.exceptions as exceptions
+import container_builder.src.exceptions as exceptions
 
 # Resolution strategies come in after a build has completed with various ways to determine
 # when a pushable change has occured
@@ -13,7 +13,7 @@ class Strategy(ABC):
         self.repo = repo
 
     @abstractmethod
-    def execute(self, **kwargs):
+    def execute(self, cont, **kwargs):
         pass
 
 
@@ -21,8 +21,24 @@ class MockStrat(Strategy):
     def __init__(self, repo):
         super().__init__(repo)
 
-    def execute(self, **kwargs):
+    def execute(self, cont, **kwargs):
         pass
+
+
+class BlindBuild(Strategy):
+    def __init__(self, repo):
+        super().__init__(repo)
+
+    def execute(self, cont, **kwargs):
+        build = kwargs['build']
+        config = kwargs['config']
+        build.run(
+            cont,
+            config,
+            tag=f"{config['repo']}:latest",
+            build_repo=None,
+            latest=True,
+        )
 
 
 class Branch(Strategy):
@@ -143,3 +159,4 @@ class Tag(Strategy):
 # extra references for config file
 track_branch = Branch
 track_tag = Tag
+blind_build = BlindBuild

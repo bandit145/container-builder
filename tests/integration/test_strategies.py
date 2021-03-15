@@ -1,7 +1,7 @@
-import builder.src.strategies as strats
-import builder.src.repos as repos
-from builder.src.build import Build
-from builder.src.config import Config
+import container_builder.src.strategies as strats
+import container_builder.src.repos as repos
+from container_builder.src.build import Build
+from container_builder.src.config import Config
 import docker
 import logging
 import json

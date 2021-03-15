@@ -1,4 +1,4 @@
-from builder.src.build import Build
+from container_builder.src.build import Build
 import json
 import docker
 import os

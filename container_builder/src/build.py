@@ -2,7 +2,8 @@ import docker
 import os
 import json
 import shutil
-from builder.src.exceptions import BuildException
+import datetime
+from container_builder.src.exceptions import BuildException
 
 
 class Build:
@@ -56,6 +57,7 @@ class Build:
             self.logger.error(f"{repo}:{tag} does not exist")
 
     def run(self, cont, config, tag, build_repo, latest=False):
+        self.logger.info(f"Build started on {datetime.datetime.now()}")
         extra_tag = None
         if latest:
             extra_tag = "latest"
@@ -71,13 +73,17 @@ class Build:
             raise BuildException(error)
         finally:
             self.cleanup(cont)
+            self.logger.info(f"Build ended on {datetime.datetime.now()}")
 
     def prep(self, cont, build_repo):
         cwd = os.getcwd()
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
-        shutil.copytree(f"{cwd}/{cont}", f"{self.build_dir}/{cont}/")
-        shutil.copytree(build_repo, f"{self.build_dir}/{cont}/build-dir/")
+        if not os.path.exists(f"{self.build_dir}/{cont}/"):
+            shutil.copytree(f"{cwd}/{cont}", f"{self.build_dir}/{cont}/")
+        # mock repos can be used, if that is the case, this will be None
+        if build_repo:
+            shutil.copytree(build_repo, f"{self.build_dir}/{cont}/build-dir/")
 
     def cleanup(self, cont):
         shutil.rmtree(f"{self.build_dir}/{cont}")
@@ -102,6 +108,7 @@ class Build:
                 )
                 running_cont.remove(force=True)
                 raise BuildException("Container test failed!")
+        self.logger.info(f'All {len(tests)} tests passed')
         running_cont.remove(force=True)
 
     def push(self, cont, repo, extra_tag=None):

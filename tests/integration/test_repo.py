@@ -1,4 +1,4 @@
-from builder.src.repos import Git
+from container_builder.src.repos import Git
 import subprocess
 
 GIT_URL = "https://github.com/bandit145/test-repo.git"

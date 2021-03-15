@@ -1,6 +1,6 @@
 import json
 import os
-from builder.src.exceptions import ConfigException
+from container_builder.src.exceptions import ConfigException
 
 
 class Config:

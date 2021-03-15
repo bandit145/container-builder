@@ -1,4 +1,4 @@
-from builder.src.config import Config
+from container_builder.src.config import Config
 
 CONFIG_FILE = "tests/data/info.json"
 
