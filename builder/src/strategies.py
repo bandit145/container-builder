@@ -81,10 +81,10 @@ class Tag(Strategy):
         for tag in str(output.stdout).strip("b'").split("\\n"):
             tag = tag.strip("v")
             if replace_text:
-                tag = tag.replace(replace_text['match'], replace_text['replacement'])
-            #force semver format
-            if force_semver and len(tag.split('.')) < 3:
-                tag += '.0'
+                tag = tag.replace(replace_text["match"], replace_text["replacement"])
+            # force semver format
+            if force_semver and len(tag.split(".")) < 3:
+                tag += ".0"
             try:
                 tags.append(semver.VersionInfo.parse(tag))
             # assume there are some nonsense tags and just throw them away
@@ -95,12 +95,12 @@ class Tag(Strategy):
     def execute(self, cont, **kwargs):
         build = kwargs["build"]
         config = kwargs["config"]
-        if 'replace_text' in config["strategy"]["args"].keys():
-            replace_text = config["strategy"]["args"]['replace_text']
+        if "replace_text" in config["strategy"]["args"].keys():
+            replace_text = config["strategy"]["args"]["replace_text"]
         else:
             replace_text = None
-        if 'force_semver' in config["strategy"]["args"].keys():
-            force_semver = config["strategy"]["args"]['force_semver']
+        if "force_semver" in config["strategy"]["args"].keys():
+            force_semver = config["strategy"]["args"]["force_semver"]
         else:
             force_semver = None
 
@@ -112,7 +112,9 @@ class Tag(Strategy):
                 config["strategy"]["args"]["version"]
             ):
                 if replace_text:
-                    repo_tag = str(vsn_tag).replace(replace_text['replacement'], replace_text['match'])
+                    repo_tag = str(vsn_tag).replace(
+                        replace_text["replacement"], replace_text["match"]
+                    )
                 else:
                     repo_tag = vsn_tag
                 if force_semver:

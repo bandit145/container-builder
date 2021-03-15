@@ -39,10 +39,9 @@ def test_test():
     build.test(f'{conf["repo"]}:latest', None, tests)
     build.cleanup("doh")
     os.chdir(cwd)
-    #check that no dangling containers exist
-    assert client.images.list(filters={'dangling': True}) == []
+    # check that no dangling containers exist
+    assert client.images.list(filters={"dangling": True}) == []
     cont = client.containers.run(f'{conf["repo"]}:latest', detach=True)
-    code, out = cont.exec_run('doh-server -version')
-    #check that right version was built
-    assert '2.2.1' in  str(out)
-
+    code, out = cont.exec_run("doh-server -version")
+    # check that right version was built
+    assert "2.2.1" in str(out)

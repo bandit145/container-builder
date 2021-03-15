@@ -36,12 +36,16 @@ def test_local_tag_strategy():
     assert len(strat.get_local_repo_tags(None, False)) == 2
     assert "1.0.0" in strat.get_local_repo_tags(None, False)
 
+
 def test_touched_up_local_tags():
     config = import_config("tests/containers/isc-bind/info.json")
-    strat = strats.Tag(repos.Git(REPO_DIR, **{'url': WEIRD_SEMVER_GIT_REPO}))
+    strat = strats.Tag(repos.Git(REPO_DIR, **{"url": WEIRD_SEMVER_GIT_REPO}))
     strat.repo.update()
-    tags = strat.get_local_repo_tags(config['strategy']['args']['replace_text'], config['strategy']['args']['force_semver'])
-    assert '9.17.0' in tags
+    tags = strat.get_local_repo_tags(
+        config["strategy"]["args"]["replace_text"],
+        config["strategy"]["args"]["force_semver"],
+    )
+    assert "9.17.0" in tags
 
 
 def test_tag_strategy():
@@ -70,7 +74,9 @@ def test_tag_strategy():
     assert "2.2.4" in str(out)
     cont1.remove(force=True)
     cont2.remove(force=True)
-def test_tag_strategy_with_broken_isc_repo():
+
+
+def test_tag_strategy_with_non_standard_isc_repo():
     client = create_client()
     config = import_config("tests/containers/isc-bind/info.json")
     build = Build(logging, "fake_docker", "fake_docker")
@@ -79,7 +85,7 @@ def test_tag_strategy_with_broken_isc_repo():
     strat = strats.Tag(repo)
     cwd = os.getcwd()
     os.chdir(CONTAINER_REPO)
-    #don't test this container
+    # don't test this container
     build.test_flag = False
     strat.execute("isc-bind", build=build, config=config)
     os.chdir(cwd)
