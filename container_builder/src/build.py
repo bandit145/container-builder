@@ -70,6 +70,7 @@ class Build:
             if self.push_flag:
                 self.push(cont, tag, extra_tag)
         except Exception as error:
+            self.logger.info(error)
             raise BuildException(error)
         finally:
             self.cleanup(cont)
@@ -87,10 +88,10 @@ class Build:
 
     def cleanup(self, cont):
         shutil.rmtree(f"{self.build_dir}/{cont}")
-        [
-            self.client.images.remove(x.id, force=True)
-            for x in self.client.images.list(filters={"dangling": True})
-        ]
+        # [
+        #     self.client.images.remove(x.id, force=True)
+        #     for x in self.client.images.list(filters={"dangling": True})
+        # ]
         # this isn't implemented in podmans docker faux api so we do it the hard way ^
         # self.client.images.prune(filters={'dangling': True})
 
@@ -98,18 +99,24 @@ class Build:
         running_cont = self.client.containers.run(
             f"{tag}", detach=True, cap_add=capabilities
         )
-        for test in tests:
-            output = running_cont.exec_run(test["command"])
-            try:
-                assert eval(f'{test["assert"].strip()} str({str(output.output)})')
-            except (AssertionError, SyntaxError):
-                self.logger.info(
-                    f"{tag} test failed: assert {test['assert']} {output.output}"
-                )
-                running_cont.remove(force=True)
-                raise BuildException("Container test failed!")
+        try:
+            for test in tests:
+            #ECH, rewrite this without assertion
+                try:
+                    output = running_cont.exec_run(test["command"])
+                    assert eval(f'{test["assert"].strip()} str({str(output.output)})')
+                except (AssertionError, SyntaxError):
+                    self.logger.info(
+                        f"{tag} test failed: assert {test['assert']} {output.output}"
+                    )
+                    running_cont.remove(force=True)
+                    raise BuildException("Container test failed!")
+        except docker.errors.APIError as error:
+            self.logger.info(f"{tag} test failed due to docker api error: {error}")
+            raise BuildException("Could not exec into container for test")
+        finally:
+            running_cont.remove(force=True)
         self.logger.info(f"All {len(tests)} tests passed")
-        running_cont.remove(force=True)
 
     def push(self, cont, repo, extra_tag=None):
         self.logger.info(f"pushing container {cont} to {repo}")

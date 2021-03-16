@@ -2,11 +2,14 @@ from container_builder.src.config import Config
 from container_builder.src.build import Build
 import logging
 import container_builder.src.repos as repos
+from container_builder.src.exceptions import BuildException
 import container_builder.src.strategies as strats
 import argparse
+import docker
 import multiprocessing
 import os
 import sys
+import atexit
 
 
 def parse_args():
@@ -55,22 +58,30 @@ def discover_containers(cont_dir):
                 conts.append(item)
     return conts
 
+def clean_dangling_containers():
+    client = docker.from_env()
+    [
+        client.images.remove(x.id, force=True)
+        for x in client.images.list(filters={"dangling": True})
+    ]
 
 # logger per runner
 def configure_logging(cont, log_dir, log_level):
     if not os.path.isdir(log_dir):
         raise Exception("log directory not created")
-    logging.basicConfig(
-        filename=f"{log_dir}/{cont}.log", level=getattr(logging, log_level.upper())
-    )
+    logger = logging.getLogger(cont)
+    logger.setLevel(getattr(logging, log_level.upper()))
+    fh = logging.FileHandler(f"{log_dir}/{cont}.log")
+    logger.addHandler(fh)
+    return logger
 
 
 def build_container(data):
     cont = data[0]
     args = data[1]
-    configure_logging(cont, args.log_dir, args.log_level)
+    logger = configure_logging(cont, args.log_dir, args.log_level)
     build = Build(
-        logging,
+        logger,
         args.userenv,
         args.passwordenv,
         **{"test_flag": args.test, "push_flag": args.push},
@@ -89,7 +100,11 @@ def build_container(data):
         strat = getattr(strats, conf.config["strategy"]["name"])(repo)
     else:
         raise Exception(f"{conf.config['strategy']['name']} strategy not found!")
-    strat.execute(cont, build=build, config=conf.config)
+    try:
+        strat.execute(cont, build=build, config=conf.config)
+    except BuildException as error:
+        print("Something went wrong during the build process for", f"{cont}.", "Reason:", f'"{error}"')
+        print(f"See logs at {args.log_dir}/{cont} for more details")
 
 
 def execute_container_builds(args):
@@ -98,12 +113,13 @@ def execute_container_builds(args):
     else:
         conts = discover_containers(args.dir)
     with multiprocessing.Pool(args.workers) as pool:
-        pool.map(build_container, [(x, args) for x in conts])
+        results = pool.map(build_container, [(x, args) for x in conts])
 
 
 def run():
     try:
         args = parse_args()
+        atexit.register(clean_dangling_containers)
         execute_container_builds(args)
     except KeyboardInterrupt:
         print("User cancelled!")
