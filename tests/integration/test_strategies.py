@@ -23,12 +23,14 @@ def import_config(file):
     conf.load(file)
     return conf.config
 
+
 def cleanup():
     client = create_client()
     [
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
+
 
 atexit.register(cleanup)
 

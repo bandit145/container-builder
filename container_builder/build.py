@@ -2,7 +2,11 @@ from container_builder.src.config import Config
 from container_builder.src.build import Build
 import logging
 import container_builder.src.repos as repos
-from container_builder.src.exceptions import BuildException, StrategyException, RepoException
+from container_builder.src.exceptions import (
+    BuildException,
+    StrategyException,
+    RepoException,
+)
 import container_builder.src.strategies as strats
 import argparse
 import docker
@@ -81,6 +85,7 @@ def configure_logging(cont, log_dir, log_level):
 def build_container(data):
     cont = data[0]
     args = data[1]
+    result = {'container': cont, 'pass': True}
     logger = configure_logging(cont, args.log_dir, args.log_level)
     build = Build(
         logger,
@@ -97,11 +102,15 @@ def build_container(data):
         # get repo_dir from somewhere
         repo = getattr(repos, repo_name)(args.repo_dir, **conf.config["src"]["args"])
     else:
-        raise Exception(f"{repo_name} repo type not found!")
+        print(f"{repo_name} repo type not found!", file=sys.stderr)
+        result['pass'] = False
+        return result
     if hasattr(strats, conf.config["strategy"]["name"]):
         strat = getattr(strats, conf.config["strategy"]["name"])(repo)
     else:
-        raise Exception(f"{conf.config['strategy']['name']} strategy not found!")
+        print(f"{conf.config['strategy']['name']} strategy not found!", file=sys.stderr)
+        result['pass'] = False
+        return result
     try:
         strat.execute(cont, build=build, config=conf.config)
     except (BuildException, StrategyException) as error:
@@ -109,19 +118,35 @@ def build_container(data):
             "Something went wrong during the build process for",
             f"{cont}.",
             "Reason:",
-            error
+            error,
+            file=sys.stderr
         )
-        print(f"See logs at {args.log_dir}/{cont} for more details")
+        print(f"See logs at {args.log_dir}/{cont} for more details", file=sys.stderr)
+        result['pass'] = False
     except RepoException as error:
-        print("Something went wrong with repo operations for {cont}", "Reason:",error)
+        print("Something went wrong with repo operations for {cont}", "Reason:", error, file=sys.stderr)
+        result['pass'] = False
+    finally:
+        return result
+
 
 def execute_container_builds(args):
+    failure = False
     if "Dockerfile" in os.listdir(args.dir):
         conts = [args.dir]
     else:
         conts = discover_containers(args.dir)
     with multiprocessing.Pool(args.workers) as pool:
         results = pool.map(build_container, [(x, args) for x in conts])
+    print("End of run report:")
+    for item in results:
+        if item['pass']:
+            print('==>',item['container'],'build passed')
+        else:
+            print('==>',item['container'],'build failed')
+            failure = True
+    if failure:
+        sys.exit(1)
 
 
 def run():

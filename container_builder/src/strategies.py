@@ -68,7 +68,11 @@ class Tag(Strategy):
         repo_domain = repo[0]
         del repo[0]
         repo = "/".join(repo)
-        req = requests.get(f"https://{repo_domain}/v2/{repo}/tags/list")
+        try:
+            req = requests.get(f"https://{repo_domain}/v2/{repo}/tags/list")
+        except requests.RequestException as error:
+            raise StrategyException(f"Error grabbing remote repo tags {error}")
+
         # deal with betas etc.
         # add in  master/main/latest support
         tags = sorted(

@@ -5,6 +5,7 @@ import os
 import logging
 import atexit
 
+
 def import_config(file):
 
     with open(file, "r") as conf:
@@ -14,6 +15,7 @@ def import_config(file):
 def create_client():
     return docker.from_env()
 
+
 def cleanup():
     client = create_client()
     [
@@ -21,7 +23,9 @@ def cleanup():
         for x in client.images.list(filters={"dangling": True})
     ]
 
+
 atexit.register(cleanup)
+
 
 def test_build():
     cwd = os.getcwd()
