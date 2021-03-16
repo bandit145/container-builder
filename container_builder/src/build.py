@@ -101,7 +101,7 @@ class Build:
         )
         try:
             for test in tests:
-            #ECH, rewrite this without assertion
+                # ECH, rewrite this without assertion
                 try:
                     output = running_cont.exec_run(test["command"])
                     assert eval(f'{test["assert"].strip()} str({str(output.output)})')

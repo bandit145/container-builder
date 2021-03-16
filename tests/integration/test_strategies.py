@@ -6,6 +6,7 @@ import docker
 import logging
 import json
 import os
+import atexit
 
 GIT_URL = "https://github.com/bandit145/test-repo.git"
 WEIRD_SEMVER_GIT_REPO = "https://gitlab.isc.org/isc-projects/bind9.git"
@@ -21,6 +22,15 @@ def import_config(file):
     conf = Config()
     conf.load(file)
     return conf.config
+
+def cleanup():
+    client = create_client()
+    [
+        client.images.remove(x.id, force=True)
+        for x in client.images.list(filters={"dangling": True})
+    ]
+
+atexit.register(cleanup)
 
 
 def test_remote_tag_strategy():

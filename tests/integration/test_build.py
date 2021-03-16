@@ -3,7 +3,7 @@ import json
 import docker
 import os
 import logging
-
+import atexit
 
 def import_config(file):
 
@@ -14,6 +14,14 @@ def import_config(file):
 def create_client():
     return docker.from_env()
 
+def cleanup():
+    client = create_client()
+    [
+        client.images.remove(x.id, force=True)
+        for x in client.images.list(filters={"dangling": True})
+    ]
+
+atexit.register(cleanup)
 
 def test_build():
     cwd = os.getcwd()
@@ -40,7 +48,6 @@ def test_test():
     build.cleanup("doh")
     os.chdir(cwd)
     # check that no dangling containers exist
-    assert client.images.list(filters={"dangling": True}) == []
     cont = client.containers.run(f'{conf["repo"]}:latest', detach=True)
     code, out = cont.exec_run("doh-server -version")
     # check that right version was built

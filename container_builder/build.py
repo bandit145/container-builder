@@ -2,7 +2,7 @@ from container_builder.src.config import Config
 from container_builder.src.build import Build
 import logging
 import container_builder.src.repos as repos
-from container_builder.src.exceptions import BuildException
+from container_builder.src.exceptions import BuildException, StrategyException, RepoException
 import container_builder.src.strategies as strats
 import argparse
 import docker
@@ -58,12 +58,14 @@ def discover_containers(cont_dir):
                 conts.append(item)
     return conts
 
+
 def clean_dangling_containers():
     client = docker.from_env()
     [
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
+
 
 # logger per runner
 def configure_logging(cont, log_dir, log_level):
@@ -102,10 +104,16 @@ def build_container(data):
         raise Exception(f"{conf.config['strategy']['name']} strategy not found!")
     try:
         strat.execute(cont, build=build, config=conf.config)
-    except BuildException as error:
-        print("Something went wrong during the build process for", f"{cont}.", "Reason:", f'"{error}"')
+    except (BuildException, StrategyException) as error:
+        print(
+            "Something went wrong during the build process for",
+            f"{cont}.",
+            "Reason:",
+            error
+        )
         print(f"See logs at {args.log_dir}/{cont} for more details")
-
+    except RepoException as error:
+        print("Something went wrong with repo operations for {cont}", "Reason:",error)
 
 def execute_container_builds(args):
     if "Dockerfile" in os.listdir(args.dir):
