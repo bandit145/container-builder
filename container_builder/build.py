@@ -85,7 +85,7 @@ def configure_logging(cont, log_dir, log_level):
 def build_container(data):
     cont = data[0]
     args = data[1]
-    result = {'container': cont, 'pass': True}
+    result = {"container": cont, "pass": True}
     logger = configure_logging(cont, args.log_dir, args.log_level)
     build = Build(
         logger,
@@ -103,13 +103,13 @@ def build_container(data):
         repo = getattr(repos, repo_name)(args.repo_dir, **conf.config["src"]["args"])
     else:
         print(f"{repo_name} repo type not found!", file=sys.stderr)
-        result['pass'] = False
+        result["pass"] = False
         return result
     if hasattr(strats, conf.config["strategy"]["name"]):
         strat = getattr(strats, conf.config["strategy"]["name"])(repo)
     else:
         print(f"{conf.config['strategy']['name']} strategy not found!", file=sys.stderr)
-        result['pass'] = False
+        result["pass"] = False
         return result
     try:
         strat.execute(cont, build=build, config=conf.config)
@@ -119,13 +119,18 @@ def build_container(data):
             f"{cont}.",
             "Reason:",
             error,
-            file=sys.stderr
+            file=sys.stderr,
         )
         print(f"See logs at {args.log_dir}/{cont} for more details", file=sys.stderr)
-        result['pass'] = False
+        result["pass"] = False
     except RepoException as error:
-        print("Something went wrong with repo operations for {cont}", "Reason:", error, file=sys.stderr)
-        result['pass'] = False
+        print(
+            "Something went wrong with repo operations for {cont}",
+            "Reason:",
+            error,
+            file=sys.stderr,
+        )
+        result["pass"] = False
     finally:
         return result
 
@@ -136,14 +141,17 @@ def execute_container_builds(args):
         conts = [args.dir]
     else:
         conts = discover_containers(args.dir)
+    if conts == []:
+        print('No containers to build found')
+        sys.exit(0)
     with multiprocessing.Pool(args.workers) as pool:
         results = pool.map(build_container, [(x, args) for x in conts])
     print("End of run report:")
     for item in results:
-        if item['pass']:
-            print('==>',item['container'],'build passed')
+        if item["pass"]:
+            print("==>", item["container"], "build passed")
         else:
-            print('==>',item['container'],'build failed')
+            print("==>", item["container"], "build failed")
             failure = True
     if failure:
         sys.exit(1)
