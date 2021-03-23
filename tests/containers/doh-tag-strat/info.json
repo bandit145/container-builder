@@ -1,0 +1,16 @@
+{
+        "repo":"quay.io/bandit145/doh-test",
+        "src":{
+        	"type": "git",
+                "args": {
+        	       "url": "https://github.com/m13253/dns-over-https.git"
+                }
+        },
+        "strategy": {
+        	"name": "track_tag",
+                "args": {
+        	       "tag_prefix": "v",
+                       "version": "2.2.3"
+                }
+        }
+}

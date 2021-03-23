@@ -1,0 +1,18 @@
+{
+        "repo":"quay.io/bandit145/isc-bind-test",
+        "src":{
+        	"type": "git",
+                "args": {
+        	       "url": "https://gitlab.isc.org/isc-projects/bind9.git"
+                }
+        },
+        "strategy": {
+        	"name": "track_tag",
+                "args": {
+        	       "tag_prefix": "v",
+                   "version": "9.17.8",
+                   "replace_text": {"match": "_", "replacement": "."},
+                   "force_semver": false
+                }
+        }
+}

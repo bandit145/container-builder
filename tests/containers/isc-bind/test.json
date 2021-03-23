@@ -1,0 +1,6 @@
+[
+	{
+		"command": "cd /build-dir && git tag --points-at HEAD",
+		"assert": "'v9_17' in"
+	}
+]

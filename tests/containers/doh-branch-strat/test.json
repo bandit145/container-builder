@@ -1,0 +1,6 @@
+[
+	{
+		"command": "ps",
+		"assert": "'doh-server' in"
+	}
+]
