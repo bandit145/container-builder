@@ -24,7 +24,6 @@ def parse_args():
         help="directory to build from. If not used builds all",
         default=".",
     )
-    parser.add_argument("-l", "--labels", help="labels in label=thing,label2=thing")
     parser.add_argument(
         "-p",
         "--push",
@@ -142,7 +141,7 @@ def execute_container_builds(args):
     else:
         conts = discover_containers(args.dir)
     if conts == []:
-        print('No containers to build found')
+        print("No containers to build found")
         sys.exit(0)
     with multiprocessing.Pool(args.workers) as pool:
         results = pool.map(build_container, [(x, args) for x in conts])
