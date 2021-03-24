@@ -55,8 +55,6 @@ no code or artifacts to pull down and include)
 		- branch: You must provide the git branch to track; args: {"branch": "devel"}.
 		
 		- track_tag: Track semver tags with these supported args.
-			
-			args:
 		
 				- force_semver: true/false; this option if it finds a tag number without a trailing zero, it adds a ".0" to make it semver compliant.
 			
