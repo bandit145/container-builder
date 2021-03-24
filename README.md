@@ -50,19 +50,19 @@ no code or artifacts to pull down and include)
 	
 	There are 3 build strategies:
 		
-		- blind_build: This has no args other then empty dict "{}".
+	- blind_build: This has no args other then empty dict "{}".
 		
-		- branch: You must provide the git branch to track; args: {"branch": "devel"}.
+	- branch: You must provide the git branch to track; args: {"branch": "devel"}.
 		
-		- track_tag: Track semver tags with these supported args.
+	- track_tag: Track semver tags with these supported args.
 		
-				- force_semver: true/false; this option if it finds a tag number without a trailing zero, it adds a ".0" to make it semver compliant.
+		- force_semver: true/false; this option if it finds a tag number without a trailing zero, it adds a ".0" to make it semver compliant.
 			
-				- replace_text: {"match": "-", "replacement": "."} replaces all occurrences of match with replacement.
+		- replace_text: {"match": "-", "replacement": "."} replaces all occurrences of match with replacement.
 			
-				- tag_prefix: prefix of tag e.g. "v".
+		- tag_prefix: prefix of tag e.g. "v".
 			
-				- version: oldest tag to build back to e.g. "I want to build version 2.1.2 and up"
+		- version: oldest tag to build back to e.g. "I want to build version 2.1.2 and up"
 
 info.json example:
 ```
