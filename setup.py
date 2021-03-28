@@ -7,7 +7,7 @@ with open("requirements.txt", "r") as reqs:
 
 setup(
     name="container-builder",
-    version="1.0.0-rc.1",
+    version="1.0.0-rc.3",
     description="manage container builds in a single repo",
     author="Philip Bove",
     install_requires=requirements,
