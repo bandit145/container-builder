@@ -46,6 +46,9 @@ class Build:
         return image[0]
 
     def read_test(self, cont):
+        # if test file doesn't exist
+        if not os.path.exists(f"{cont}/test.json"):
+            return []
         with open(f"{cont}/test.json", mode="r") as conf:
             test = json.load(conf)
         return test
