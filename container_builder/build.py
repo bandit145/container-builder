@@ -70,6 +70,11 @@ def clean_dangling_containers():
     ]
 
 
+def create_temp_dir(tmp_dir):
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir)
+
+
 # logger per runner
 def configure_logging(cont, log_dir, log_level):
     if not os.path.isdir(log_dir):
@@ -110,6 +115,8 @@ def build_container(data):
         print(f"{conf.config['strategy']['name']} strategy not found!", file=sys.stderr)
         result["pass"] = False
         return result
+    repo.update()
+    strat.execute(cont, build=build, config=conf.config)
     try:
         strat.execute(cont, build=build, config=conf.config)
     except (BuildException, StrategyException) as error:
@@ -160,6 +167,7 @@ def run():
     try:
         args = parse_args()
         atexit.register(clean_dangling_containers)
+        create_temp_dir(args.repo_dir)
         execute_container_builds(args)
     except KeyboardInterrupt:
-        print("User cancelled!")
+        print("User canceled!")

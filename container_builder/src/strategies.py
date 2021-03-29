@@ -16,6 +16,19 @@ class Strategy(ABC):
     def execute(self, cont, **kwargs):
         pass
 
+    @classmethod
+    def validate_config(self, config, schema):
+        new_conf = {}
+        conf_keys = config.keys()
+        for k, v in schema.items():
+            if v["required"] and k not in conf_keys:
+                raise exceptions.ConfigException(f"Config missing {k}")
+            elif "default" in v.keys() and k not in conf_keys:
+                new_conf[k] = v["default"]
+            elif k in conf_keys:
+                new_conf[k] = config[k]
+        return new_conf
+
 
 class MockStrat(Strategy):
     def __init__(self, repo):
@@ -26,6 +39,8 @@ class MockStrat(Strategy):
 
 
 class BlindBuild(Strategy):
+    SCHEMA = {}
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -42,6 +57,8 @@ class BlindBuild(Strategy):
 
 
 class Branch(Strategy):
+    SCHEMA = {"branch": {"required": True}}
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -59,6 +76,14 @@ class Branch(Strategy):
 
 
 class Tag(Strategy):
+
+    SCHEMA = {
+        "force_semver": {"required": False, "default": False},
+        "replace_text": {"required": False},
+        "tag_prefix": {"required": False},
+        "version": {"required": True},
+    }
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -123,7 +148,6 @@ class Tag(Strategy):
             force_semver = config["strategy"]["args"]["force_semver"]
         else:
             force_semver = None
-
         rmt_tags = set(self.get_remote_repo_tags(config["repo"]))
         lcl_tags = set(self.get_local_repo_tags(replace_text, force_semver))
         tag_diff = sorted(lcl_tags.difference(rmt_tags), reverse=True)
