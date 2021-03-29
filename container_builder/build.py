@@ -69,9 +69,11 @@ def clean_dangling_containers():
         for x in client.images.list(filters={"dangling": True})
     ]
 
+
 def create_temp_dir(tmp_dir):
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir)
+
 
 # logger per runner
 def configure_logging(cont, log_dir, log_level):
@@ -168,4 +170,4 @@ def run():
         create_temp_dir(args.repo_dir)
         execute_container_builds(args)
     except KeyboardInterrupt:
-        print("User cancelled!")
+        print("User canceled!")

@@ -28,7 +28,9 @@ class Config:
                 new_conf[k] = v["default"]
             elif "strategy" == k:
                 if not hasattr(strats, config[k]["name"]):
-                    raise ConfigException(f"strategy {config[k]['name']} does not exist")
+                    raise ConfigException(
+                        f"strategy {config[k]['name']} does not exist"
+                    )
                 strat = getattr(strats, config[k]["name"])
                 new_conf[k] = config[k]
                 new_conf[k]["args"] = strat.validate_config(
