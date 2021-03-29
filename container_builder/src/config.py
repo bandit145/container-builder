@@ -26,10 +26,14 @@ class Config:
                 raise ConfigException(f"Config missing {k}")
             elif "default" in v.keys() and k not in conf_keys:
                 new_conf[k] = v["default"]
-            elif 'strategy' == k:
-                strat = getattr(strats, config[k]['name'])
+            elif "strategy" == k:
+                if not hasattr(strats, config[k]["name"]):
+                    raise ConfigException(f"strategy {config[k]['name']} does not exist")
+                strat = getattr(strats, config[k]["name"])
                 new_conf[k] = config[k]
-                new_conf[k]['args'] = strat.validate_config(config[k]['args'], strat.SCHEMA)
+                new_conf[k]["args"] = strat.validate_config(
+                    config[k]["args"], strat.SCHEMA
+                )
             elif k in conf_keys:
                 new_conf[k] = config[k]
         return new_conf

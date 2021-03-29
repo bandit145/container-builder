@@ -29,6 +29,7 @@ class Strategy(ABC):
                 new_conf[k] = config[k]
         return new_conf
 
+
 class MockStrat(Strategy):
     def __init__(self, repo):
         super().__init__(repo)
@@ -39,6 +40,7 @@ class MockStrat(Strategy):
 
 class BlindBuild(Strategy):
     SCHEMA = {}
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -55,9 +57,8 @@ class BlindBuild(Strategy):
 
 
 class Branch(Strategy):
-    SCHEMA = {
-        'branch': {'required': True}
-    }
+    SCHEMA = {"branch": {"required": True}}
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -77,11 +78,12 @@ class Branch(Strategy):
 class Tag(Strategy):
 
     SCHEMA = {
-        'force_semver': {'required': False, 'default': False},
-        'replace_text': {'required': False},
-        'tag_prefix': {'required': False},
-        'version': {'required': True}
+        "force_semver": {"required": False, "default": False},
+        "replace_text": {"required": False},
+        "tag_prefix": {"required": False},
+        "version": {"required": True},
     }
+
     def __init__(self, repo):
         super().__init__(repo)
 
@@ -146,7 +148,6 @@ class Tag(Strategy):
             force_semver = config["strategy"]["args"]["force_semver"]
         else:
             force_semver = None
-
         rmt_tags = set(self.get_remote_repo_tags(config["repo"]))
         lcl_tags = set(self.get_local_repo_tags(replace_text, force_semver))
         tag_diff = sorted(lcl_tags.difference(rmt_tags), reverse=True)

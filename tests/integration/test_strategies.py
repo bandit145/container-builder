@@ -25,8 +25,9 @@ def import_config(file):
     conf.load(file)
     return conf.config
 
+
 def import_raw_config(file):
-    with open(file, 'r') as conf_file:
+    with open(file, "r") as conf_file:
         return json.load(conf_file)
 
 
@@ -43,23 +44,31 @@ atexit.register(cleanup)
 
 # Config tests
 
+
 def test_branch_strategy_config():
     config = import_raw_config("tests/containers/doh-branch-strat/info.json")
-    new_args = strats.Branch.validate_config(config['strategy']['args'], strats.Branch.SCHEMA)
-    assert new_args['branch'] == 'v2.0.0'
+    new_args = strats.Branch.validate_config(
+        config["strategy"]["args"], strats.Branch.SCHEMA
+    )
+    assert new_args["branch"] == "v2.0.0"
     config = import_raw_config("tests/containers/doh-tag-strat/info.json")
     with pytest.raises(exceptions.ConfigException) as error:
-        new_args = strats.Branch.validate_config(config['strategy']['args'], strats.Branch.SCHEMA)
-    assert 'missing branch' in str(error)
+        new_args = strats.Branch.validate_config(
+            config["strategy"]["args"], strats.Branch.SCHEMA
+        )
+    assert "missing branch" in str(error)
+
 
 def test_tag_strategy_config():
     config = import_raw_config("tests/containers/doh-tag-strat/info.json")
-    new_args = strats.Tag.validate_config(config['strategy']['args'], strats.Tag.SCHEMA)
-    assert not new_args['force_semver']
+    new_args = strats.Tag.validate_config(config["strategy"]["args"], strats.Tag.SCHEMA)
+    assert not new_args["force_semver"]
     config = import_raw_config("tests/containers/doh-branch-strat/info.json")
     with pytest.raises(exceptions.ConfigException) as error:
-        new_args = strats.Tag.validate_config(config['strategy']['args'], strats.Tag.SCHEMA)
-    assert 'missing version' in str(error)
+        new_args = strats.Tag.validate_config(
+            config["strategy"]["args"], strats.Tag.SCHEMA
+        )
+    assert "missing version" in str(error)
 
 
 def test_remote_tag_strategy():

@@ -7,7 +7,7 @@
                 }
         },
         "strategy": {
-        	"name": "track-branch",
+        	"name": "track_branch",
                 "args": {
         	       "branch": "master"
                 }
