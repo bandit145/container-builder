@@ -116,7 +116,6 @@ def build_container(data):
         result["pass"] = False
         return result
     repo.update()
-    strat.execute(cont, build=build, config=conf.config)
     try:
         strat.execute(cont, build=build, config=conf.config)
     except (BuildException, StrategyException) as error:
