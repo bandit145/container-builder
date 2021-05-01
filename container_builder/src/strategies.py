@@ -110,7 +110,7 @@ class Tag(Strategy):
         )
         return tags
 
-    def get_local_repo_tags(self, replace_text, force_semver):
+    def get_local_repo_tags(self, replace_text, force_semver, tag_prefix):
         output = subprocess.run(
             "git tag",
             shell=True,
@@ -124,7 +124,7 @@ class Tag(Strategy):
             )
         tags = []
         for tag in str(output.stdout).strip("b'").split("\\n"):
-            tag = tag.strip("v")
+            tag = tag.strip(tag_prefix)
             if replace_text:
                 tag = tag.replace(replace_text["match"], replace_text["replacement"])
             # force semver format
@@ -148,8 +148,12 @@ class Tag(Strategy):
             force_semver = config["strategy"]["args"]["force_semver"]
         else:
             force_semver = None
+        if "tag_prefix" in config["strategy"]["args"].keys():
+            tag_prefix = config["strategy"]["args"]["tag_prefix"]
+        else:
+            force_semver = "v"
         rmt_tags = set(self.get_remote_repo_tags(config["repo"]))
-        lcl_tags = set(self.get_local_repo_tags(replace_text, force_semver))
+        lcl_tags = set(self.get_local_repo_tags(replace_text, force_semver, tag_prefix))
         tag_diff = sorted(lcl_tags.difference(rmt_tags), reverse=True)
         for vsn_tag in tag_diff:
             if vsn_tag >= semver.VersionInfo.parse(
@@ -163,9 +167,7 @@ class Tag(Strategy):
                     repo_tag = vsn_tag
                 if force_semver:
                     repo_tag = repo_tag.strip(f'{replace_text["match"]}0')
-                self.repo.set_branch(
-                    f"{config['strategy']['args']['tag_prefix']}{repo_tag}"
-                )
+                self.repo.set_branch(f"{tag_prefix}{repo_tag}")
                 if list(tag_diff).index(vsn_tag) == 0:
                     build.run(
                         cont,
