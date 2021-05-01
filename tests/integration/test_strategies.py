@@ -38,9 +38,8 @@ def cleanup():
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
-    if os.path.exists('/tmp/container-builder'):
-        shutil.rmtree('/tmp/container-builder')
-
+    if os.path.exists("/tmp/container-builder"):
+        shutil.rmtree("/tmp/container-builder")
 
 
 atexit.register(cleanup)
@@ -96,7 +95,7 @@ def test_touched_up_local_tags():
     tags = strat.get_local_repo_tags(
         config["strategy"]["args"]["replace_text"],
         config["strategy"]["args"]["force_semver"],
-        "v"
+        "v",
     )
     assert "9.17.0" in tags
 

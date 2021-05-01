@@ -6,6 +6,7 @@ import logging
 import atexit
 import shutil
 
+
 def import_config(file):
 
     with open(file, "r") as conf:
@@ -22,8 +23,8 @@ def cleanup():
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
-    if os.path.exists('/tmp/container-builder'):
-        shutil.rmtree('/tmp/container-builder')
+    if os.path.exists("/tmp/container-builder"):
+        shutil.rmtree("/tmp/container-builder")
 
 
 atexit.register(cleanup)

@@ -167,9 +167,7 @@ class Tag(Strategy):
                     repo_tag = vsn_tag
                 if force_semver:
                     repo_tag = repo_tag.strip(f'{replace_text["match"]}0')
-                self.repo.set_branch(
-                    f"{tag_prefix}{repo_tag}"
-                )
+                self.repo.set_branch(f"{tag_prefix}{repo_tag}")
                 if list(tag_diff).index(vsn_tag) == 0:
                     build.run(
                         cont,
