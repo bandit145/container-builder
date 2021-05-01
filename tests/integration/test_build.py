@@ -4,7 +4,7 @@ import docker
 import os
 import logging
 import atexit
-
+import shutil
 
 def import_config(file):
 
@@ -22,6 +22,8 @@ def cleanup():
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
+    if os.path.exists('/tmp/container-builder'):
+        shutil.rmtree('/tmp/container-builder')
 
 
 atexit.register(cleanup)
@@ -56,3 +58,4 @@ def test_test():
     code, out = cont.exec_run("doh-server -version")
     # check that right version was built
     assert "2.2.1" in str(out)
+    cont.remove(force=True)
