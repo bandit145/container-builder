@@ -6,6 +6,7 @@ import container_builder.src.exceptions as exceptions
 import docker
 import logging
 import pytest
+import shutil
 import json
 import os
 import atexit
@@ -37,6 +38,8 @@ def cleanup():
         client.images.remove(x.id, force=True)
         for x in client.images.list(filters={"dangling": True})
     ]
+    if os.path.exists("/tmp/container-builder"):
+        shutil.rmtree("/tmp/container-builder")
 
 
 atexit.register(cleanup)
@@ -81,8 +84,8 @@ def test_remote_tag_strategy():
 def test_local_tag_strategy():
     strat = strats.Tag(repos.Git(REPO_DIR, **{"url": GIT_URL}))
     strat.repo.update()
-    assert len(strat.get_local_repo_tags(None, False)) == 2
-    assert "1.0.0" in strat.get_local_repo_tags(None, False)
+    assert len(strat.get_local_repo_tags(None, False, "v")) == 2
+    assert "1.0.0" in strat.get_local_repo_tags(None, False, "v")
 
 
 def test_touched_up_local_tags():
@@ -92,6 +95,7 @@ def test_touched_up_local_tags():
     tags = strat.get_local_repo_tags(
         config["strategy"]["args"]["replace_text"],
         config["strategy"]["args"]["force_semver"],
+        "v",
     )
     assert "9.17.0" in tags
 

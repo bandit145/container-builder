@@ -34,8 +34,13 @@ class Build:
         self.logger.info(f"Starting build of container {cont}")
         # I think rm true only works sometimes(?) so we do false here so there isn't one missing
         # (I think this might be a race condition) with docker/podman
+        # this is needed to clean up with docker, podman does it on it's own and seemginly ignores these
         image = self.client.images.build(
-            path=f"{self.build_dir}/{cont}", tag=tag, buildargs=build_args
+            path=f"{self.build_dir}/{cont}",
+            tag=tag,
+            buildargs=build_args,
+            rm=True,
+            forcerm=True,
         )
         try:
             [self.logger.info(x["stream"]) for x in image[1] if "stream" in x.keys()]
